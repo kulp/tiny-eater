@@ -1,0 +1,25 @@
+# KiCad
+*.sch-bak
+*.kicad_pcb-bak
+*-backups/
+*.lck
+fp-info-cache
+*.kicad_prl
+# DRC and ERC scratch reports
+*-drc.rpt
+*-erc.rpt
+_gen/
+
+# OS
+.DS_Store
+Thumbs.db
+sim/*.log
+
+# Third-party vendor data, fetched by tools/fetch_footprints.py
+attenuator.pretty/
+models/Same_Sky_RCJ-044/
+models/RCJ-04/*.zip
+
+# Python bytecode and the test suite's JSON reports
+__pycache__/
+out/

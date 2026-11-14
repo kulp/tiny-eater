@@ -1,0 +1,4 @@
+(fp_lib_table
+	(version 7)
+	(lib (name "attenuator") (type "KiCad") (uri "${KIPRJMOD}/attenuator.pretty") (options "") (descr "Attenuator project footprints"))
+)

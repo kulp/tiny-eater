@@ -1,0 +1,5 @@
+https://www.sameskydevices.com/product/resource/pcbfootprint/rcj-044
+
+https://www.snapeda.com/parts/RCJ-044/Same%20Sky/view-part/
+# Actual download URL is like this (but requires authentication via query parameters):
+# https://snapeda.s3.amazonaws.com/media/Converted/CADParts/2026-11-14/kicad_modv6/p12702083/RCJ-044.zip
