@@ -11,6 +11,10 @@ fp-info-cache
 _gen/
 # production build output
 build/
+# enclosure build output
+enclosure/*.stl
+# generated cutaway renders
+enclosure/cutaways/
 
 # OS
 .DS_Store
