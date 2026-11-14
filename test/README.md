@@ -1,9 +1,8 @@
-# KiCad design checks
+# Design checks
 
-Automated design checks for this project, driven by `kicad-cli` and Python.
-The entry point is `test/run_tests.sh`; it runs three checks and prints a
-human-readable report to stdout, plus machine-readable JSON reports in
-`test/out/`.
+Automated design checks for this project, driven by `kicad-cli`, OpenSCAD and
+Python. The entry point is `test/run_tests.sh`; it prints a human-readable report
+to stdout, plus machine-readable JSON reports in `test/out/`.
 
 ## Usage
 
@@ -29,6 +28,12 @@ file at its top level.
    (`kicad-cli sch export netlist`) and compares it with the PCB file:
    missing footprints, extra footprints, duplicate references, pad/net
    mismatches, and missing pads.
+4. **Enclosure fit** - runs `enclosure/check_castellations.py`, which renders
+   the enclosure and lid with OpenSCAD and measures that the wall tabs pass
+   through the lid notches with no contact, that the interface exists on both
+   parts, and that the lid is a single uniform thickness with every tab inside
+   it. The check is skipped (reported as SKIP, not as a failure) when the project
+   directory has no `enclosure/` directory.
 
 Each kicad-cli run also uses `--exit-code-violations`, and
 `check_drc_erc.py` cross-checks that exit code against the JSON report: a
@@ -38,7 +43,7 @@ disagreement is reported as a finding of its own.
 
 | Code | Meaning |
 |------|---------|
-| 0    | all three checks report no violations |
+| 0    | all checks that ran report no violations |
 | 1    | one or more checks report violations |
 | 2    | setup error (missing kicad-cli, missing project files, unreadable report) |
 
@@ -52,7 +57,7 @@ to report no violations and the suite exits 0.
 
 | File | Role |
 |------|------|
-| `run_tests.sh`       | entry point; orchestrates the three checks |
+| `run_tests.sh`       | entry point; orchestrates the checks |
 | `check_drc_erc.py`   | parses the DRC/ERC JSON reports and prints findings |
 | `check_connectivity.py` | netlist vs PCB parity checker |
 | `out/`               | generated reports (`drc.json`, `erc.json`, `netlist.net`); regenerated on every run |
@@ -63,3 +68,6 @@ to report no violations and the suite exits 0.
   `/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli`; override with
   the `KICAD_CLI` environment variable.
 - `python3` (override with the `PYTHON` environment variable).
+- `openscad` for the enclosure check (override with the `OPENSCAD` environment
+  variable). The check is skipped when the project directory has no
+  `enclosure/` directory.

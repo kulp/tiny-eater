@@ -91,3 +91,7 @@ pass.
 - `ngspice sim/tpad_01dB.sp` through `sim/tpad_10dB.sp`: each run confirms
   the target attenuation (1.000 dB through 10.000 dB) and 75.00 ohm input
   impedance at the matched values in `sim/resistor_table.csv`.
+- `python3 enclosure/check_castellations.py`, also run by `make test`: the tabs
+  on the enclosure's wall ends pass through the notches cut in the lid with zero
+  interference, and the lid stays a single thickness with every tab inside it.
+  Prints PASS and exits 0.
