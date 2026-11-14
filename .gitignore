@@ -9,6 +9,8 @@ fp-info-cache
 *-drc.rpt
 *-erc.rpt
 _gen/
+# production build output
+build/
 
 # OS
 .DS_Store

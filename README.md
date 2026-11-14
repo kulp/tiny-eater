@@ -41,10 +41,37 @@ termination.
   legacy footprint files with `kicad-cli fp upgrade`, and prints the manual
   download steps for sources a plain GET cannot reach.
 - `test/`: the design check suite described in `test/README.md`.
+- `Makefile`: runs the design checks with `make test`, and regenerates the
+  resistor table, the production board and the 3D PCB renders with `make`.
+- `scripts/build_production_pcb.py`: builds `build/attenuator.kicad_pcb`
+  with all copper zones filled, for gerber export and fabrication. The
+  committed board carries no zone fill data; the script refills every zone,
+  writes the output, and verifies the fills persisted.
+- `scripts/gen_resistor_table.py`: computes the T-pad resistor table
+  (closed form) and prints it; pass `--write` to simulate the T-pad at each
+  attenuation step and write the per-D netlists, logs, and
+  `sim/resistor_table.csv`. The default range is 1 to 10 dB in 1 dB steps
+  (which reproduces the committed table); `--start`, `--stop`, and `--step`
+  configure the range and the step size.
+
+## PCB renders
+
+`./scripts/render_pcb_3d.sh`, also run by `make pcb-renders`, ray-traces the
+board with `kicad-cli pcb render` and writes one PNG per side into `build/`.
+`make pcb-renders` waits on the RCJ-044 STEP model that
+`tools/fetch_footprints.py` downloads, because the RCA jacks do not appear in
+the render without it. Neither `build/` nor `models/Same_Sky_RCJ-044/` is
+committed, so the images below only appear once you have generated them
+locally.
+
+![Attenuator board, component side](build/attenuator_3d_front.png)
+
+![Attenuator board, solder side, carrying the silkscreen resistor table](build/attenuator_3d_back.png)
 
 ## Verification
 
-Run `test/run_tests.sh` to do several checks in one pass.
+Run `make test` (which calls `test/run_tests.sh`) to do several checks in one
+pass.
 
 - `kicad-cli sch erc attenuator.kicad_sch`: no violations once
   `attenuator.pretty/` has been built. On a fresh clone it reports two
