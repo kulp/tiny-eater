@@ -53,10 +53,10 @@ termination.
   `sim/resistor_table.csv`. The default range is 1 to 10 dB in 1 dB steps
   (which reproduces the committed table); `--start`, `--stop`, and `--step`
   configure the range and the step size.
-- `enclosure/`: the printed snap-fit enclosure and lid (`enclosure.scad`): a
-  box that holds the board in a slide-in slot, closed by a plate of uniform
-  thickness whose rim is notched around tabs on the wall ends, so the lid can
-  only be pulled straight off.
+- `enclosure/`: the printed snap-fit enclosure and lid (`enclosure.scad`), PNG
+  cutaways (`render_cutaways.py`), the castellation fit check
+  (`check_castellations.py`) and `build_parts.sh`, which writes the lid, the
+  enclosure body and a combined both-parts-in-one-file STL to `build/`.
 
 ## PCB renders
 
