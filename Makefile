@@ -7,8 +7,8 @@ OPENSCAD  ?= openscad
 # Only the entry points are phony. Every step that writes a file has a rule
 # named after that file, so running a target twice in a row does nothing until
 # one of its inputs is newer than its output.
-.PHONY: all test resistor-table production-pcb pcb-renders clean
-all: resistor-table production-pcb pcb-renders
+.PHONY: all test resistor-table production-pcb pcb-renders enclosure-render clean
+all: resistor-table production-pcb pcb-renders enclosure-render
 
 test:
 	bash test/run_tests.sh
@@ -16,6 +16,7 @@ test:
 resistor-table: sim/resistor_table.csv
 production-pcb: build/attenuator.kicad_pcb
 pcb-renders: build/attenuator_3d_front.png build/attenuator_3d_back.png
+enclosure-render: build/enclosure.png
 
 sim/resistor_table.csv: scripts/gen_resistor_table.py
 	$(PYTHON) scripts/gen_resistor_table.py --write
@@ -38,6 +39,15 @@ models/Same_Sky_RCJ-044/RCJ-044.step: tools/fetch_footprints.py models/RCJ-04/Sa
 
 build/attenuator_3d_front.png build/attenuator_3d_back.png &: scripts/render_pcb_3d.sh build/attenuator.kicad_pcb | models/Same_Sky_RCJ-044/RCJ-044.step
 	bash scripts/render_pcb_3d.sh
+
+# The print-ready enclosure parts, which the README picture is drawn from.
+build/enclosure.stl build/lid.stl build/enclosure_and_lid.stl &: enclosure/enclosure.scad enclosure/build_parts.sh
+	bash enclosure/build_parts.sh
+
+# The enclosure picture in the README: the body and lid in one STL, translucent
+# and seen from a three-quarter perspective.
+build/enclosure.png: build/enclosure_and_lid.stl enclosure/render_stl.py
+	./enclosure/render_stl.py --projection perspective --azimuth 45 --distance 160 --opacity 0.5 --colorscheme="Tomorrow"
 
 clean:
 	rm -rf build

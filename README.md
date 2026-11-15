@@ -23,7 +23,7 @@ points (IN, MID, OUT, GND) let the settings be checked with a multimeter.
 - `test/`: design checks.
 
 Run `make test` to run the checks, and `make` to build the production board and
-the renders below.
+its renders.
 
 ![Attenuator board, component side](build/attenuator_3d_front.png)
 
