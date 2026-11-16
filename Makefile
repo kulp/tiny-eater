@@ -43,3 +43,15 @@ sim/resistor_table.csv: scripts/gen_resistor_table.py
 all: sim-netlists
 sim-netlists:
 	$(PYTHON) scripts/gen_resistor_table.py --netlists
+
+# A copy of the board with the ground zones refilled.  kicad-cli's 3D render only
+# draws zone copper that is present in the file, so the renders need the filled
+# copy; --save-board writes the refill back to the copy, leaving the committed
+# board untouched.  The project file has to sit next to the copy, because the
+# net-class clearances that bound the fill live in it.
+.PHONY: production-pcb
+all: production-pcb
+production-pcb: build/attenuator.kicad_pcb
+build/attenuator.kicad_pcb: attenuator.kicad_pcb attenuator.kicad_pro
+	cp attenuator.kicad_pcb attenuator.kicad_pro build/
+	$(KICAD_CLI) pcb drc --refill-zones --save-board build/attenuator.kicad_pcb
