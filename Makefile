@@ -78,3 +78,12 @@ all: enclosure-build
 enclosure-build: build/enclosure.stl build/lid.stl build/enclosure_and_lid.stl
 build/enclosure.stl build/lid.stl build/enclosure_and_lid.stl &: enclosure/enclosure.scad enclosure/build_parts.sh
 	bash enclosure/build_parts.sh
+
+# The enclosure picture the README shows: body and lid as one STL, translucent and
+# seen from the front, which is the view render_stl.py documents as the one that
+# keeps the two silhouettes apart.
+.PHONY: enclosure-render
+all: enclosure-render
+enclosure-render: build/enclosure.png
+build/enclosure.png: build/enclosure_and_lid.stl enclosure/render_stl.py
+	./enclosure/render_stl.py --projection perspective --distance 160 --opacity 0.5 --colorscheme="Tomorrow"
