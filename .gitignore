@@ -9,6 +9,9 @@ fp-info-cache
 *-drc.rpt
 *-erc.rpt
 
+# production build output
+build/
+
 # OS
 .DS_Store
 Thumbs.db
