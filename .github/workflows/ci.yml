@@ -1,0 +1,106 @@
+name: build
+
+on:
+  # Branch pushes only: a tag push would make the release name latest-<tag>,
+  # and there is no branch to build for it.
+  push:
+    branches: ["*"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    # A push and the pull request for the same branch both run this job, and
+    # both would try to update the same latest-<branch> release. Grouping by
+    # ref makes the second run wait for the first instead of racing it.
+    concurrency:
+      group: build-${{ github.ref }}
+      cancel-in-progress: false
+
+    # The default Actions token is read-only ("Read repository contents and
+    # packages permissions"), which is enough to build but not to create a
+    # release. Declaring the scope here makes the workflow independent of the
+    # repository's default setting; write includes read, so checkout still
+    # works.
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # kicad-packages3d is a suggestion rather than a recommendation, but the
+      # board references ${KICAD10_3DMODEL_DIR} for the trimmer, so it has to
+      # be explicit for the renders. openscad builds the enclosure STLs and the
+      # README picture (enclosure/build_parts.sh, enclosure/render_stl.py); its
+      # PNG export needs an offscreen OpenGL context, so xvfb provides a
+      # virtual X server for it.
+      - name: Install KiCad 10, OpenSCAD, ngspice and Xvfb
+        run: |
+          sudo add-apt-repository -y ppa:kicad/kicad-10.0-releases
+          sudo apt-get update
+          sudo apt-get install -y --install-recommends kicad kicad-packages3d openscad ngspice xvfb
+          version="$(kicad-cli --version)"
+          if [ "${version#10.}" = "$version" ]; then
+            echo "expected KiCad 10 from the PPA, got $version" >&2
+            exit 1
+          fi
+          echo "kicad-cli: $version"
+          echo "openscad: $(openscad --version 2>&1 | head -1)"
+
+      # KiCad's CLI does not create the per-user library tables on a fresh
+      # runner. Without them, the standard symbol and footprint libraries are
+      # reported as DRC/ERC violations.
+      - name: Configure KiCad libraries
+        run: |
+          config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/kicad/10.0"
+          mkdir -p "$config_dir"
+          cp /usr/share/kicad/template/sym-lib-table "$config_dir/"
+          cp /usr/share/kicad/template/fp-lib-table "$config_dir/"
+
+      # The design checks run first so a broken board fails before the renders
+      # are produced.  Nothing they need has to be downloaded by hand any more:
+      # the jack footprint is carried in the board file.  ngspice is installed
+      # because the build's resistor-table target simulates each T-pad.
+      - name: Design checks
+        run: make test
+
+      # OpenSCAD's PNG export fails without an X server ("Can't create OpenGL
+      # OffscreenView"), which only affects the enclosure picture; STL export
+      # and kicad-cli pcb render work headless. Running the whole build under
+      # Xvfb keeps it to one command.
+      - name: Build
+        run: xvfb-run -a make
+
+      # Everything make writes into build/ (the 3D renders, the enclosure PNG
+      # and STLs, and the zone-filled production board) is published as an
+      # artifact so the outputs can be inspected without cloning. An artifact
+      # URL names one run and the artifact expires, so it is not a permanent
+      # link; the rolling release below is.
+      - name: Publish the build outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: attenuator-build
+          path: build/
+          retention-days: 90
+          if-no-files-found: error
+
+      # Every branch gets its own rolling release, latest-<branch>, whose asset
+      # URLs never change. A branch name with a slash becomes a dash so the
+      # asset URL stays one path segment.
+      - name: Update the rolling release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          tag="latest-${BRANCH//\//-}"
+          renders="build/attenuator_3d_front.png build/attenuator_3d_back.png build/enclosure.png"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" $renders --clobber
+          else
+            gh release create "$tag" --title "Latest $BRANCH build" \
+              --notes "Renders produced by the CI build of $BRANCH; replaced on every run." \
+              $renders
+          fi
+          echo "renders: https://github.com/${{ github.repository }}/releases/download/$tag/attenuator_3d_front.png"
