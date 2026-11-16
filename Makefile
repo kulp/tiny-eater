@@ -72,3 +72,12 @@ all: pcb-renders
 pcb-renders: build/attenuator_3d_front.png build/attenuator_3d_back.png
 build/attenuator_3d_front.png build/attenuator_3d_back.png &: scripts/render_pcb_3d.sh build/attenuator.kicad_pcb | models/Same_Sky_RCJ-044/RCJ-044.step
 	bash scripts/render_pcb_3d.sh
+
+OPENSCAD ?= openscad
+
+# The print-ready enclosure parts.
+.PHONY: enclosure-build
+all: enclosure-build
+enclosure-build: build/enclosure.stl build/lid.stl build/enclosure_and_lid.stl
+build/enclosure.stl build/lid.stl build/enclosure_and_lid.stl &: enclosure/enclosure.scad enclosure/build_parts.sh | build
+	bash enclosure/build_parts.sh

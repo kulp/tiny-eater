@@ -12,6 +12,9 @@ fp-info-cache
 # production build output
 build/
 
+# enclosure build output
+enclosure/*.stl
+
 # OS
 .DS_Store
 Thumbs.db
