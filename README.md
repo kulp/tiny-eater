@@ -22,6 +22,7 @@ let the settings be checked with a multimeter.
 - `attenuator.kicad_pcb`: the board.  The RCA jack footprint lives inside the board file rather than in a footprint library: the vendor licence bars redistributing its footprint package as a standalone file, but allows board designs that combine it with other elements.
 - `sim/`: `resistor_table.csv` plus the [ngspice](https://ngspice.sourceforge.io)
   netlists generated from it for each 1dB step.
+- `enclosure/`: a 3D-printed case in [OpenSCAD](https://openscad.org) format.
 - `models/`: datasheets and 3D models for the parts, or links to them.
 - `test/`: design checks.
 
