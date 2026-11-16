@@ -17,8 +17,11 @@ let the settings be checked with a multimeter.
 - `attenuator.kicad_sch`, `attenuator.kicad_sym`: the [KiCad](https://www.kicad.org) schematic and the RCJ-044 symbol for the RCA jack.
 - `attenuator.kicad_pro`: the KiCad project.  The jack's footprint is named in the schematic but lives in no library, so ERC's `footprint_link_issues` check is set to `ignore`.
 - `attenuator.kicad_pcb`: the board.  The RCA jack footprint lives inside the board file rather than in a footprint library: the vendor licence bars redistributing its footprint package as a standalone file, but allows board designs that combine it with other elements.
+- `test/`: design checks.
 
 The jack's silkscreen dot overlaps the trimmer silkscreen, so `attenuator.kicad_pro`
-sets the `silk_overlap` rule to `ignore`.
+sets the `silk_overlap` rule to `ignore`.  Everything else the check suite looks at
+reports no violations.
 
-Run `make` to plot the gerbers into `build/gerbers/`.
+Run `make` to plot the gerbers into `build/gerbers/`, and `make test` to run the
+design checks.
