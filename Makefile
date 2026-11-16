@@ -21,3 +21,8 @@ all: gerbers
 gerbers: build/gerbers/attenuator-F_Cu.gtl build/gerbers/attenuator-B_Cu.gbl
 build/gerbers/attenuator-F_Cu.gtl build/gerbers/attenuator-B_Cu.gbl &: attenuator.kicad_pcb
 	$(KICAD_CLI) pcb export gerbers --check-zones -o build/gerbers/ attenuator.kicad_pcb
+
+# The design checks: board DRC, schematic ERC and netlist-versus-board parity.
+.PHONY: test
+test:
+	bash test/run_tests.sh

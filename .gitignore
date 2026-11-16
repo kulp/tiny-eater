@@ -15,3 +15,7 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Python bytecode and the test suite's JSON reports
+__pycache__/
+out/
