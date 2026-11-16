@@ -55,3 +55,11 @@ production-pcb: build/attenuator.kicad_pcb
 build/attenuator.kicad_pcb: attenuator.kicad_pcb attenuator.kicad_pro
 	cp attenuator.kicad_pcb attenuator.kicad_pro build/
 	$(KICAD_CLI) pcb drc --refill-zones --save-board build/attenuator.kicad_pcb
+
+# The vendor STEP model of the RCA jack, downloaded into models/Same_Sky_RCJ-044/
+# from the source named in the provenance note.  The tool leaves an already
+# downloaded model alone, so the rule stamps the file; otherwise make would keep
+# re-running the fetch every time it is invoked.
+models/Same_Sky_RCJ-044/RCJ-044.step: tools/fetch_models.py models/RCJ-04/Same_Sky_RCJ-044.zip.txt
+	$(PYTHON) tools/fetch_models.py
+	touch $@
