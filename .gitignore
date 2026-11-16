@@ -1,8 +1,13 @@
 # KiCad
 *.sch-bak
+*.kicad_pcb-bak
 *-backups/
 *.lck
 fp-info-cache
+*.kicad_prl
+# DRC and ERC scratch reports
+*-drc.rpt
+*-erc.rpt
 
 # OS
 .DS_Store
