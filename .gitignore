@@ -15,6 +15,9 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+sim/*.log
+# The per-dB netlists are generated from sim/resistor_table.csv
+sim/tpad_*.sp
 
 # Python bytecode and the test suite's JSON reports
 __pycache__/

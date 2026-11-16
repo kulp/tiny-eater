@@ -29,3 +29,17 @@ build/gerbers/attenuator-F_Cu.gtl build/gerbers/attenuator-B_Cu.gbl &: attenuato
 .PHONY: test
 test:
 	bash test/run_tests.sh
+
+# The trimmer settings for each 1dB step, and the ngspice netlists derived from
+# them.
+.PHONY: resistor-table
+all: resistor-table
+resistor-table: sim/resistor_table.csv
+
+sim/resistor_table.csv: scripts/gen_resistor_table.py
+	$(PYTHON) scripts/gen_resistor_table.py --write
+
+.PHONY: sim-netlists
+all: sim-netlists
+sim-netlists:
+	$(PYTHON) scripts/gen_resistor_table.py --netlists
