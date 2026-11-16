@@ -63,3 +63,12 @@ build/attenuator.kicad_pcb: attenuator.kicad_pcb attenuator.kicad_pro | build
 models/Same_Sky_RCJ-044/RCJ-044.step: tools/fetch_models.py models/RCJ-04/Same_Sky_RCJ-044.zip.txt
 	$(PYTHON) tools/fetch_models.py
 	touch $@
+
+# Both sides of the board, rendered from the zone-filled copy.  The STEP model is
+# an order-only prerequisite: it has to exist for the jacks to show up, but
+# refreshing it does not by itself make the renders stale.
+.PHONY: pcb-renders
+all: pcb-renders
+pcb-renders: build/attenuator_3d_front.png build/attenuator_3d_back.png
+build/attenuator_3d_front.png build/attenuator_3d_back.png &: scripts/render_pcb_3d.sh build/attenuator.kicad_pcb | models/Same_Sky_RCJ-044/RCJ-044.step
+	bash scripts/render_pcb_3d.sh
