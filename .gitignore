@@ -1,0 +1,9 @@
+# KiCad
+*.sch-bak
+*-backups/
+*.lck
+fp-info-cache
+
+# OS
+.DS_Store
+Thumbs.db
