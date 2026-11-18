@@ -1,0 +1,92 @@
+PYTHON    ?= python3
+# KICAD_CLI is exported so recipes that shell out to helper scripts pick it up
+# too.
+KICAD_CLI ?= kicad-cli
+export KICAD_CLI
+
+# Each target is a self-contained block: it registers itself with `all` and
+# defines its own rules.  Adding a target therefore appends a block of lines
+# and changes nothing above it.  Only the entry points are phony: every step
+# that writes a file has a rule named after that file, so running a target twice
+# in a row does nothing until one of its inputs is newer than its output.
+.PHONY: all
+all:
+
+.PHONY: clean
+clean:
+	rm -rf build
+
+# The fabrication output straight from the committed board.  --check-zones
+# refills the GND copper before plotting, so no pre-filled copy of the board is
+# needed.
+.PHONY: gerbers
+all: gerbers
+gerbers: build/gerbers/attenuator-F_Cu.gtl build/gerbers/attenuator-B_Cu.gbl
+build/gerbers/attenuator-F_Cu.gtl build/gerbers/attenuator-B_Cu.gbl &: attenuator.kicad_pcb
+	$(KICAD_CLI) pcb export gerbers --check-zones -o build/gerbers/ attenuator.kicad_pcb
+
+# The design checks: board DRC, schematic ERC and netlist-versus-board parity.
+.PHONY: test
+test:
+	bash test/run_tests.sh
+
+# The trimmer settings for each 1dB step, and the ngspice netlists derived from
+# them.
+.PHONY: resistor-table
+all: resistor-table
+resistor-table: sim/resistor_table.csv
+
+sim/resistor_table.csv: scripts/gen_resistor_table.py
+	$(PYTHON) scripts/gen_resistor_table.py --write
+
+.PHONY: sim-netlists
+all: sim-netlists
+sim-netlists:
+	$(PYTHON) scripts/gen_resistor_table.py --netlists
+
+# A copy of the board with the ground zones refilled.  kicad-cli's 3D render only
+# draws zone copper that is present in the file, so the renders need the filled
+# copy; --save-board writes the refill back to the copy, leaving the committed
+# board untouched.  The project file has to sit next to the copy, because the
+# net-class clearances that bound the fill live in it.
+.PHONY: production-pcb
+all: production-pcb
+production-pcb: build/attenuator.kicad_pcb
+build/attenuator.kicad_pcb: attenuator.kicad_pcb attenuator.kicad_pro
+	cp attenuator.kicad_pcb attenuator.kicad_pro build/
+	$(KICAD_CLI) pcb drc --refill-zones --save-board build/attenuator.kicad_pcb
+
+# The vendor STEP model of the RCA jack, downloaded into models/Same_Sky_RCJ-044/
+# from the source named in the provenance note.  The tool leaves an already
+# downloaded model alone, so the rule stamps the file; otherwise make would keep
+# re-running the fetch every time it is invoked.
+models/Same_Sky_RCJ-044/RCJ-044.step: tools/fetch_models.py models/RCJ-04/Same_Sky_RCJ-044.zip.txt
+	$(PYTHON) tools/fetch_models.py
+	touch $@
+
+# Both sides of the board, rendered from the zone-filled copy.  The STEP model is
+# an order-only prerequisite: it has to exist for the jacks to show up, but
+# refreshing it does not by itself make the renders stale.
+.PHONY: pcb-renders
+all: pcb-renders
+pcb-renders: build/attenuator_3d_front.png build/attenuator_3d_back.png
+build/attenuator_3d_front.png build/attenuator_3d_back.png &: scripts/render_pcb_3d.sh build/attenuator.kicad_pcb | models/Same_Sky_RCJ-044/RCJ-044.step
+	bash scripts/render_pcb_3d.sh
+
+OPENSCAD ?= openscad
+
+# The print-ready enclosure parts.
+.PHONY: enclosure-build
+all: enclosure-build
+enclosure-build: build/enclosure.stl build/lid.stl build/enclosure_and_lid.stl
+build/enclosure.stl build/lid.stl build/enclosure_and_lid.stl &: enclosure/enclosure.scad enclosure/build_parts.sh
+	bash enclosure/build_parts.sh
+
+# The enclosure picture the README shows: body and lid as one STL, translucent and
+# seen from the front, which is the view render_stl.py documents as the one that
+# keeps the two silhouettes apart.
+.PHONY: enclosure-render
+all: enclosure-render
+enclosure-render: build/enclosure.png
+build/enclosure.png: build/enclosure_and_lid.stl enclosure/render_stl.py
+	./enclosure/render_stl.py --projection perspective --distance 160 --opacity 0.5 --colorscheme="Tomorrow"

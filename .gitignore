@@ -1,0 +1,31 @@
+# KiCad
+*.sch-bak
+*.kicad_pcb-bak
+*-backups/
+*.lck
+fp-info-cache
+*.kicad_prl
+# DRC and ERC scratch reports
+*-drc.rpt
+*-erc.rpt
+
+# production build output
+build/
+
+# enclosure build output
+enclosure/*.stl
+
+# OS
+.DS_Store
+Thumbs.db
+sim/*.log
+# The per-dB netlists are generated from sim/resistor_table.csv
+sim/tpad_*.sp
+
+# The RCJ-044 STEP model, fetched by tools/fetch_models.py
+models/Same_Sky_RCJ-044/
+models/RCJ-04/*.zip
+
+# Python bytecode and the test suite's JSON reports
+__pycache__/
+out/
