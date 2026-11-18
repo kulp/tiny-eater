@@ -21,3 +21,5 @@ let the settings be checked with a multimeter.
 
 The jack's silkscreen dot overlaps the trimmer silkscreen, so `attenuator.kicad_pro`
 sets the `silk_overlap` rule to `ignore`.
+
+Run `make` to plot the gerbers into `build/gerbers/`.
