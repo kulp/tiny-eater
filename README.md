@@ -31,3 +31,9 @@ engineering and design checks.
 ![Attenuator board, solder side](https://github.com/kulp/tiny-eater/releases/download/latest-main/attenuator_3d_back.png)
 
 ![The printed enclosure standing next to its lid, with the castellation tabs on top of the body](https://github.com/kulp/tiny-eater/releases/download/latest-main/enclosure.png)
+
+## LLM usage
+
+The PCB design itself was modified heavily in KiCad 10 by a human, but an
+original version was drafted by Qwen3.8-27B. Test and build support was drafted
+by several Qwen3.8 models.
